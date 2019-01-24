@@ -29,7 +29,7 @@ For older versions of Laravel (<5.5), you have to add the service provider and a
 
 'alias' => [
         ...
-        'Saml2' => Aacotroneo\Saml2\Facades\Saml2Auth::class,
+        'Saml2' => Aacotroneo\Saml2\Facades\Saml2::class,
 ]
 ```
 
@@ -47,7 +47,7 @@ $metadata['http://laravel_url/saml2/metadata'] = array(
     'SingleLogoutService' => 'http://laravel_url/saml2/sls',
     //the following two affect what the $Saml2user->getUserId() will return
     'NameIDFormat' => 'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent',
-    'simplesaml.nameidattribute' => 'uid' 
+    'simplesaml.nameidattribute' => 'uid'
 );
 ```
 You can check that metadata if you actually navigate to 'http://laravel_url/saml2/metadata'
@@ -147,7 +147,7 @@ Now there are two ways the user can log out.
 
 For case 1 call `Saml2Auth::logout();` or redirect the user to the route 'saml_logout' which does just that. Do not close the session inmediately as you need to receive a response confirmation from the IDP (redirection). That response will be handled by the library at /saml2/sls and will fire an event for you to complete the operation.
 
-For case 2 you will only receive the event. Both cases 1 and 2 receive the same event. 
+For case 2 you will only receive the event. Both cases 1 and 2 receive the same event.
 
 Note that for case 2, you may have to manually save your session to make the logout stick (as the session is saved by middleware, but the OneLogin library will redirect back to your IDP before that happens)
 

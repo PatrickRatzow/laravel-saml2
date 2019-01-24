@@ -124,7 +124,7 @@ return [
         # 'lowercaseUrlencoding' => false,
     ],
 
-    // Contact information template, it is recommended to suply a technical and support contacts
+    // Contact information template, it is recommended to suply a technical and support contacts.
     'contactPerson' => [
         'technical' => [
             'givenName'    => 'John Doe',
@@ -136,9 +136,9 @@ return [
         ],
     ],
 
-    // Organization information template, the info in en_US lang is recomended, add more if required
+    // Organization information template, the info in 'en' or 'en_US' lang is recomended, add more if required.
     'organization' => [
-        'en-US' => [
+        'en' => [
             'name'        => 'Name',
             'displayname' => 'Display Name',
             'url'         => 'http://example.com',

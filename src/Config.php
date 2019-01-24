@@ -2,6 +2,8 @@
 
 namespace Aacotroneo\Saml2;
 
+use OutOfRangeException;
+use RuntimeException;
 use Aacotroneo\Saml2\Http\Controllers\Saml2Controller;
 
 class Config
@@ -32,7 +34,117 @@ class Config
      */
     public function getRoutesController(): string
     {
-        return array_get($this->config['setting'], 'routes_controller', Saml2Controller::class);
+        return array_get($this->config['settings'], 'routes_controller') ?? Saml2Controller::class;
+    }
+
+    /**
+     * Get OneLogin configuration for the provided Service Provider name.
+     *
+     * @param string|null $name
+     *
+     * @throws OutOfRangeException If no Service Provider was found with the specified name.
+     * @throws OutOfRangeException If no Identity Provider was found with the specified name.
+     *
+     * @return array
+     */
+    public function getOneLogin(string $name = null): array
+    {
+        $group = $this->test ? 'test' : 'prod';
+        $sps = $this->config['sps'][$group];
+        $idps = $this->config['idps'][$group];
+        if (empty($name)) {
+            $name = $this->config['sps']['default'] ?? key($sps);
+        }
+
+        if (!isset($sps[$name])) {
+            throw new OutOfRangeException('Invalid Service Provider name: ' . $name);
+        }
+        if (!isset($idps[$name])) {
+            throw new OutOfRangeException('Invalid Identity Provider name: ' . $name);
+        }
+
+        // Grab and process providers.
+        $sp = $sps[$name];
+        $idp = $idps[$name];
+
+        if (empty($sp['entityId'])) {
+            $sp['entityId'] = route('saml2.metadata', compact('name'));
+        }
+        if (empty($sp['assertionConsumerService']['url'])) {
+            $sp['assertionConsumerService']['url'] = route('saml2.acs', compact('name'));
+        }
+        if (!empty($sp['singleLogoutService']) && empty($sp['singleLogoutService']['url'])) {
+            $sp['singleLogoutService']['url'] = route('saml2.sls', compact('name'));
+        }
+        if (starts_with($sp['privateKey'], '/')) {
+            $sp['privateKey'] = $this->readPrivateKey($sp['privateKey'], $sp['passphrase'] ?? '');
+        }
+        if (starts_with($sp['x509cert'], '/')) {
+            $sp['x509cert'] = $this->readCertificate($sp['x509cert']);
+        }
+        if (starts_with($idp['x509cert'], '/')) {
+            $idp['x509cert'] = $this->readCertificate($idp['x509cert']);
+        }
+
+        // Handle onelogin overrides.
+        $onelogin = $this->config['onelogin'];
+        if (isset($sp['onelogin'])) {
+            $overrides = array_pull($sp, 'onelogin');
+            if (!empty($overrides)) {
+                foreach (array_dot($overrides) as $key => $value) {
+                    array_set($onelogin, $key, $value);
+                }
+            }
+        }
+
+        return $onelogin + compact('sp', 'idp');
+    }
+
+    /**
+     * Read (and unencrypt) a private key from the specified path.
+     *
+     * @param string $path
+     * @param string $passphrase
+     *
+     * @throws RuntimeException If the private key couldn't be read.
+     *
+     * @return string
+     */
+    public function readPrivateKey(string $path, string $passphrase = ''): string
+    {
+        $resource = is_readable($path)
+            ? openssl_pkey_get_private('file://' . $path, $passphrase)
+            : false;
+        if (empty($resource)) {
+            throw new RuntimeException(sprintf("Could not read private key-file at path: '%s'", $path));
+        }
+        openssl_pkey_export($resource, $content);
+        openssl_pkey_free($resource);
+
+        return $content;
+    }
+
+    /**
+     * Read a certificate from the specified path.
+     *
+     * @param string $path
+     *
+     * @throws RuntimeException If the certificate couldn't be read.
+     *
+     * @return string
+     */
+    public function readCertificate(string $path): string
+    {
+        $resource = is_readable($path)
+            ? openssl_x509_read('file://' . $path)
+            : false;
+        if (empty($resource)) {
+            throw new RuntimeException(sprintf("Could not read certificate-file at path: '%s'", $path));
+        }
+        openssl_x509_export($resource, $content);
+        openssl_x509_free($resource);
+
+        return $content;
     }
 
     /**

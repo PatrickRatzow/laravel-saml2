@@ -75,6 +75,10 @@ return [
             // published on the SP metadata so Identity Providers can
             // read them and get ready for rollover.
             # 'x509certNew' => storage_path('certs/test/sp_new.crt'),
+
+            // Override any options specified under 'onelogin' settings.
+            # 'onelogin' => [
+            # ],
         ],
     ],
 
@@ -137,6 +141,10 @@ return [
             // published on the SP metadata so Identity Providers can
             // read them and get ready for rollover.
             # 'x509certNew' => storage_path('certs/prod/sp_new.crt'),
+
+            // Override any options specified under 'onelogin' settings.
+            # 'onelogin' => [
+            # ],
         ],
     ],
 

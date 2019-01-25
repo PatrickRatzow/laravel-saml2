@@ -28,6 +28,36 @@ class Config
     }
 
     /**
+     * Get login redirect route.
+     *
+     * @return string
+     */
+    public function getRouteLogin(): string
+    {
+        return $this->formatUrl(array_get($this->config['settings'], 'route_login'));
+    }
+
+    /**
+     * Get logout redirect route.
+     *
+     * @return string
+     */
+    public function getRouteLogout(): string
+    {
+        return $this->formatUrl(array_get($this->config['settings'], 'route_logout'));
+    }
+
+    /**
+     * Get error redirect route.
+     *
+     * @return string
+     */
+    public function getRouteError(): string
+    {
+        return $this->formatUrl(array_get($this->config['settings'], 'route_error'));
+    }
+
+    /**
      * Get routes controller, with fallback to package controller.
      *
      * @return string
@@ -42,8 +72,8 @@ class Config
      *
      * @param string|null $name
      *
-     * @throws OutOfRangeException If no Service Provider was found with the specified name.
-     * @throws OutOfRangeException If no Identity Provider was found with the specified name.
+     * @throws \OutOfRangeException If no Service Provider was found with the specified name.
+     * @throws \OutOfRangeException If no Identity Provider was found with the specified name.
      *
      * @return array
      */
@@ -57,9 +87,11 @@ class Config
         }
 
         if (!isset($sps[$name])) {
+            // @TODO: Replace with custom exception.
             throw new OutOfRangeException('Invalid Service Provider name: ' . $name);
         }
         if (!isset($idps[$name])) {
+            // @TODO: Replace with custom exception.
             throw new OutOfRangeException('Invalid Identity Provider name: ' . $name);
         }
 
@@ -101,12 +133,25 @@ class Config
     }
 
     /**
+     * Format an URL depending on whether it's a named route or a specific path.
+     *
+     * @param string $path
+     * @param array  $params
+     *
+     * @return string
+     */
+    public function formatUrl(string $path, array $params = []): string
+    {
+        return str_contains($path, '/') ? url($path, $params) : route($path, $params);
+    }
+
+    /**
      * Read (and unencrypt) a private key from the specified path.
      *
      * @param string $path
      * @param string $passphrase
      *
-     * @throws RuntimeException If the private key couldn't be read.
+     * @throws \RuntimeException If the private key couldn't be read.
      *
      * @return string
      */
@@ -114,6 +159,7 @@ class Config
     {
         $resource = openssl_pkey_get_private('file://' . $path, $passphrase);
         if (empty($resource)) {
+            // @TODO: Replace with custom exception.
             throw new RuntimeException(sprintf("Could not read private key-file at path: '%s'", $path));
         }
         openssl_pkey_export($resource, $content);
@@ -127,7 +173,7 @@ class Config
      *
      * @param string $path
      *
-     * @throws RuntimeException If the certificate couldn't be read.
+     * @throws \RuntimeException If the certificate couldn't be read.
      *
      * @return string
      */
@@ -135,6 +181,7 @@ class Config
     {
         $resource = openssl_x509_read('file://' . $path);
         if (empty($resource)) {
+            // @TODO: Replace with custom exception.
             throw new RuntimeException(sprintf("Could not read certificate-file at path: '%s'", $path));
         }
         openssl_x509_export($resource, $content);

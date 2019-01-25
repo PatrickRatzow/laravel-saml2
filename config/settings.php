@@ -40,6 +40,10 @@ return [
     // Route name is assumed, unless it contains a slash (/).
     'route_error' => '/',
 
+    // Indicates how the parameters will be
+    // retrieved from the SLS request for signature validation.
+    'params_from_server' => false,
+
     // If 'proxy_vars' is TRUE, then the Saml lib will trust proxy headers
     // e.g X-Forwarded-Proto / HTTP_X_FORWARDED_PROTO. This is useful if
     // your application is running behind a load balancer which terminates SSL.

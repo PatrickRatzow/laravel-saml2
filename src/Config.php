@@ -76,13 +76,13 @@ class Config
         if (!empty($sp['singleLogoutService']) && empty($sp['singleLogoutService']['url'])) {
             $sp['singleLogoutService']['url'] = route('saml2.sls', compact('name'));
         }
-        if (starts_with($sp['privateKey'], '/')) {
+        if (is_readable($sp['privateKey'])) {
             $sp['privateKey'] = $this->readPrivateKey($sp['privateKey'], $sp['passphrase'] ?? '');
         }
-        if (starts_with($sp['x509cert'], '/')) {
+        if (is_readable($sp['x509cert'])) {
             $sp['x509cert'] = $this->readCertificate($sp['x509cert']);
         }
-        if (starts_with($idp['x509cert'], '/')) {
+        if (is_readable($idp['x509cert'])) {
             $idp['x509cert'] = $this->readCertificate($idp['x509cert']);
         }
 
@@ -112,9 +112,7 @@ class Config
      */
     public function readPrivateKey(string $path, string $passphrase = ''): string
     {
-        $resource = is_readable($path)
-            ? openssl_pkey_get_private('file://' . $path, $passphrase)
-            : false;
+        $resource = openssl_pkey_get_private('file://' . $path, $passphrase);
         if (empty($resource)) {
             throw new RuntimeException(sprintf("Could not read private key-file at path: '%s'", $path));
         }
@@ -135,9 +133,7 @@ class Config
      */
     public function readCertificate(string $path): string
     {
-        $resource = is_readable($path)
-            ? openssl_x509_read('file://' . $path)
-            : false;
+        $resource = openssl_x509_read('file://' . $path);
         if (empty($resource)) {
             throw new RuntimeException(sprintf("Could not read certificate-file at path: '%s'", $path));
         }

@@ -1,5 +1,7 @@
 <?php
 
+use OneLogin\Saml2\Constants;
+
 return [
 
     /*
@@ -30,7 +32,7 @@ return [
                 'url' => null,
                 // SAML protocol binding to be used when returning the <Response> message.
                 // Onelogin Toolkit supports for this endpoint the HTTP-POST binding only.
-                # 'binding' => 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST',
+                # 'binding' => Constants::BINDING_HTTP_POST,
             ],
             // If you need to specify requested attributes, set an attributeConsumingService.
             // Attributes nameFormat, attributeValue and friendlyName can be omitted.
@@ -56,12 +58,12 @@ return [
                 'url' => null,
                 // SAML protocol binding to be used when returning the <Response> message.
                 // Onelogin Toolkit supports for this endpoint the HTTP-Redirect binding only.
-                # 'binding' => 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect',
+                # 'binding' => Constants::BINDING_HTTP_REDIRECT,
             ],
             // Specifies constraints on the name identifier to be used to
             // represent the requested subject.
             // Take a look on OneLogin\Saml2/Constants.php to see the NameIdFormat supported.
-            'NameIDFormat' => 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified',
+            'NameIDFormat' => Constants::NAMEID_UNSPECIFIED,
 
             // Usually x509cert and privateKey of the SP are provided by files placed at
             // the certs folder. But we can also provide them with the following parameters
@@ -96,7 +98,7 @@ return [
                 'url' => null,
                 // SAML protocol binding to be used when returning the <Response> message.
                 // Onelogin Toolkit supports for this endpoint the HTTP-POST binding only.
-                # 'binding' => 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST',
+                # 'binding' => Constants::BINDING_HTTP_POST,
             ],
             // If you need to specify requested attributes, set an attributeConsumingService.
             // Attributes nameFormat, attributeValue and friendlyName can be omitted.
@@ -122,12 +124,12 @@ return [
                 'url' => null,
                 // SAML protocol binding to be used when returning the <Response> message.
                 // Onelogin Toolkit supports for this endpoint the HTTP-Redirect binding only.
-                # 'binding' => 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect',
+                # 'binding' => Constants::BINDING_HTTP_REDIRECT,
             ],
             // Specifies constraints on the name identifier to be used to
             // represent the requested subject.
             // Take a look on OneLogin\Saml2/Constants.php to see the NameIdFormat supported.
-            'NameIDFormat' => 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified',
+            'NameIDFormat' => Constants::NAMEID_UNSPECIFIED,
 
             // Usually x509cert and privateKey of the SP are provided by files placed at
             // the certs folder. But we can also provide them with the following parameters

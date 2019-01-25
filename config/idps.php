@@ -1,5 +1,7 @@
 <?php
 
+use OneLogin\Saml2\Constants;
+
 return [
 
     /*
@@ -19,7 +21,7 @@ return [
                 'url' => '',
                 // SAML protocol binding to be used when returning the <Response> message.
                 // Onelogin Toolkit supports for this endpoint the HTTP-Redirect binding only.
-                # 'binding' => 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect',
+                # 'binding' => Constants::BINDING_HTTP_REDIRECT,
             ],
             // SLO endpoint info of the IdP.
             'singleLogoutService' => [
@@ -27,7 +29,7 @@ return [
                 'url' => '',
                 // SAML protocol binding to be used when returning the <Response> message.
                 // Onelogin Toolkit supports for this endpoint the HTTP-Redirect binding only.
-                # 'binding' => 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect',
+                # 'binding' => Constants::BINDING_HTTP_REDIRECT,
             ],
             // Public x509 certificate of the IdP.
             'x509cert' => storage_path('certs/test/idp.crt'),
@@ -70,7 +72,7 @@ return [
                 'url' => '',
                 // SAML protocol binding to be used when returning the <Response> message.
                 // Onelogin Toolkit supports for this endpoint the HTTP-Redirect binding only.
-                # 'binding' => 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect',
+                # 'binding' => Constants::BINDING_HTTP_REDIRECT,
             ],
             // SLO endpoint info of the IdP.
             'singleLogoutService' => [
@@ -78,7 +80,7 @@ return [
                 'url' => '',
                 // SAML protocol binding to be used when returning the <Response> message.
                 // Onelogin Toolkit supports for this endpoint the HTTP-Redirect binding only.
-                # 'binding' => 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect',
+                # 'binding' => Constants::BINDING_HTTP_REDIRECT,
             ],
             // Public x509 certificate of the IdP.
             'x509cert' => storage_path('certs/test/idp.crt'),

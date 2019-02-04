@@ -18,7 +18,7 @@ class Config
     /**
      * Constructor.
      *
-     * @param array $config
+     * @param array $config Combined saml2 configuration.
      *
      * @return void
      */
@@ -68,36 +68,36 @@ class Config
     }
 
     /**
-     * Get OneLogin configuration for the provided Service Provider name.
+     * Get OneLogin configuration for the provided Service Provider slug.
      *
-     * @param string|null $name
+     * @param string|null $slug Service Provider slug.
      *
-     * @throws \OutOfRangeException If no Service Provider was found with the specified name.
-     * @throws \OutOfRangeException If no Identity Provider was found with the specified name.
+     * @throws \OutOfRangeException If no Service Provider was found with the specified slug.
+     * @throws \OutOfRangeException If no Identity Provider was found with the specified slug.
      *
      * @return array
      */
-    public function getOneLogin(string $name = null): array
+    public function getOneLogin(string $slug = null): array
     {
         $group = $this->test ? 'test' : 'prod';
         $sps = $this->config['sps'][$group];
         $idps = $this->config['idps'][$group];
-        if (empty($name)) {
-            $name = $this->config['sps']['default'] ?? key($sps);
+        if (empty($slug)) {
+            $slug = $this->config['sps']['default'] ?? key($sps);
         }
 
-        if (!isset($sps[$name])) {
+        if (!isset($sps[$slug])) {
             // @TODO: Replace with custom exception.
-            throw new OutOfRangeException('Invalid Service Provider name: ' . $name);
+            throw new OutOfRangeException('Invalid Service Provider slug: ' . $slug);
         }
-        if (!isset($idps[$name])) {
+        if (!isset($idps[$slug])) {
             // @TODO: Replace with custom exception.
-            throw new OutOfRangeException('Invalid Identity Provider name: ' . $name);
+            throw new OutOfRangeException('Invalid Identity Provider slug: ' . $slug);
         }
 
         // Grab and process providers.
-        $sp = $sps[$name];
-        $idp = $idps[$name];
+        $sp = $sps[$slug];
+        $idp = $idps[$slug];
 
         if (empty($sp['entityId'])) {
             $sp['entityId'] = route('saml2.metadata', compact('name'));
@@ -130,6 +130,23 @@ class Config
         }
 
         return $onelogin + compact('sp', 'idp');
+    }
+
+    /**
+     * Resolve to default Service Provider slug if none is provided.
+     *
+     * @param string|null $slug Service Provider slug.
+     *
+     * @return string|null Will return NULL if no Service Providers are defined.
+     */
+    public function resolveOneLoginSlug(string $slug = null): ?string
+    {
+        if (empty($slug)) {
+            $group = $this->test ? 'test' : 'prod';
+            $slug = $this->config['sps']['default'] ?? key($this->config['sps'][$group]);
+        }
+
+        return $slug;
     }
 
     /**

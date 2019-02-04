@@ -16,15 +16,15 @@ class Saml2Controller extends Controller
     /**
      * Handle incoming SAML2 assertion request.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param string|null              $name
+     * @param \Illuminate\Http\Request $request Request instance.
+     * @param string|null              $slug    Service Provider slug.
      *
      * @return \Illuminate\Http\Response
      */
-    public function acs(Request $request, string $name = null): Response
+    public function acs(Request $request, string $slug = null): Response
     {
-        return $this->rescue(function () use ($name) {
-            Saml2::acs($name, $request->input('requestId'));
+        return $this->rescue(function () use ($slug) {
+            Saml2::acs($slug, $request->input('requestId'));
 
             $intended = $request->input('RelayState');
             if (empty($intended) || url()->full() === $intended) {
@@ -38,16 +38,16 @@ class Saml2Controller extends Controller
     /**
      * Initiate login request through Single Sign-On service.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param string|null              $name
+     * @param \Illuminate\Http\Request $request Request instance.
+     * @param string|null              $slug    Service Provider slug.
      *
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function login(Request $request, string $name = null): RedirectResponse
+    public function login(Request $request, string $slug = null): RedirectResponse
     {
-        return $this->rescue(function () use ($name) {
+        return $this->rescue(function () use ($slug) {
             // We want to handle the redirect ourselves.
-            $url = Saml2::login($name, Saml2::config()->route_login, [], false, false, true, true);
+            $url = Saml2::login($slug, Saml2::config()->route_login, [], false, false, true, true);
 
             return redirect($url);
         });
@@ -56,20 +56,20 @@ class Saml2Controller extends Controller
     /**
      * Initiate logout request through Single Logout service.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param string|null              $name
+     * @param \Illuminate\Http\Request $request Request instance.
+     * @param string|null              $slug    Service Provider slug.
      *
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function logout(Request $request, string $name = null): RedirectResponse
+    public function logout(Request $request, string $slug = null): RedirectResponse
     {
-        return $this->rescue(function () use ($request, $name) {
+        return $this->rescue(function () use ($request, $slug) {
             $nameId = $request->input('nameId');
             $returnTo = $request->input('returnTo');
             $sessionIndex = $request->input('sessionIndex');
             // We want to handle the redirect ourselves.
             // We should end up in the 'sls' endpoint.
-            $url = Saml2::logout($name, $returnTo, [], $nameId, $sessionIndex, true, null, null, null);
+            $url = Saml2::logout($slug, $returnTo, [], $nameId, $sessionIndex, true, null, null, null);
 
             return redirect($url);
         });
@@ -78,15 +78,15 @@ class Saml2Controller extends Controller
     /**
      * Generate Service Provider metadata.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param string|null              $name
+     * @param \Illuminate\Http\Request $request Request instance.
+     * @param string|null              $slug    Service Provider slug.
      *
      * @return \Illuminate\Http\Response
      */
-    public function metadata(Request $request, string $name = null): Response
+    public function metadata(Request $request, string $slug = null): Response
     {
-        return $this->rescue(function () use ($name) {
-            $metadata = Saml2::metadata($name);
+        return $this->rescue(function () use ($slug) {
+            $metadata = Saml2::metadata($slug);
 
             return response($metadata, 200, ['Content-Type' => 'text/xml']);
         });
@@ -95,17 +95,17 @@ class Saml2Controller extends Controller
     /**
      * Handle incoming Single Logout request.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param string|null              $name
+     * @param \Illuminate\Http\Request $request Request instance.
+     * @param string|null              $slug    Service Provider slug.
      *
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function sls(Request $request, string $name = null): RedirectResponse
+    public function sls(Request $request, string $slug = null): RedirectResponse
     {
-        return $this->rescue(function () use ($request, $name) {
+        return $this->rescue(function () use ($request, $slug) {
             $requestId = $request->input('requestId');
             // We want to handle the redirect ourselves.
-            $url = Saml2::sls($name, false, $requestId, Saml2::config()->params_from_server, true);
+            $url = Saml2::sls($slug, false, $requestId, Saml2::config()->params_from_server, true);
 
             return redirect($url ?: Saml2::config()->route_logout);
         });

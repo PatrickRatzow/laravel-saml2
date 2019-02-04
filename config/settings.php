@@ -12,11 +12,11 @@ return [
     //
     // Method | URI                             | Name
     // -------|---------------------------------|----------------
-    // POST   | {route_prefix}/acs/{name?}      | saml2.acs
-    // GET    | {route_prefix}/login/{name?}    | saml2.login
-    // GET    | {route_prefix}/logout/{name?}   | saml2.logout
-    // GET    | {route_prefix}/metadata/{name?} | saml2.metadata
-    // GET    | {route_prefix}/sls/{name?}      | saml2.sls
+    // POST   | {route_prefix}/acs/{slug?}      | saml2.acs
+    // GET    | {route_prefix}/login/{slug?}    | saml2.login
+    // GET    | {route_prefix}/logout/{slug?}   | saml2.logout
+    // GET    | {route_prefix}/metadata/{slug?} | saml2.metadata
+    // GET    | {route_prefix}/sls/{slug?}      | saml2.sls
     'setup_routes' => true,
 
     // The prefix used in all package routes.

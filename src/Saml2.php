@@ -2,13 +2,12 @@
 
 namespace Aacotroneo\Saml2;
 
-use InvalidArgumentException;
 use OneLogin\Saml2\Auth;
 use OneLogin\Saml2\Error;
 use OneLogin\Saml2\Utils;
-use RuntimeException;
 use Aacotroneo\Saml2\Events\LoginEvent;
 use Aacotroneo\Saml2\Events\LogoutEvent;
+use Aacotroneo\Saml2\Exceptions\Exception;
 use Aacotroneo\Saml2\Models\User;
 
 class Saml2
@@ -53,6 +52,8 @@ class Saml2
      * @param string|null $slug      Service Provider slug.
      * @param string|null $requestId The ID of the AuthNRequest sent by this SP to the IdP.
      *
+     * @throws \Aacotroneo\Saml2\Exceptions\Exception On any error.
+     *
      * @return void
      */
     public function acs(string $slug = null, string $requestId = null): void
@@ -61,8 +62,7 @@ class Saml2
         $auth->processResponse($requestId);
         $errorException = $auth->getLastErrorException();
         if (!empty($errorException)) {
-            // @TODO: Replace with custom exception.
-            throw new RuntimeException($auth->getLastErrorReason(), 0, $errorException);
+            throw new Exception($auth->getLastErrorReason(), 0, $errorException);
         }
 
         event(new LoginEvent($this->config->resolveOneLoginSlug($slug), new User($auth)));
@@ -145,7 +145,7 @@ class Saml2
      *
      * @param string|null $slug Service Provider slug.
      *
-     * @throws \InvalidArgumentException If metadata validation fails.
+     * @throws \OneLogin\Saml2\Error If metadata validation fails.
      *
      * @return string Metadata XML string.
      */
@@ -159,11 +159,7 @@ class Saml2
             return $metadata;
         }
 
-        // @TODO: Replace with custom exception.
-        throw new InvalidArgumentException(
-            'Invalid Service Provider metadata: ' . implode(', ', $errors),
-            Error::METADATA_SP_INVALID
-        );
+        throw new Error('Invalid Service Provider metadata: %s', Error::METADATA_SP_INVALID, [implode(', ', $errors)]);
     }
 
     /**
@@ -175,8 +171,8 @@ class Saml2
      * @param  bool        $paramsFromServer TRUE if we want to use parameters from $_SERVER to validate the signature.
      * @param  bool        $stay             TRUE if we want to stay (returns the URL string), FALSE to redirect.
      *
-     * @throws \OneLogin\Saml2\Error If SAML LogoutRequest/LogoutResponse wasn't found.
-     * @throws \RuntimeException     On any other error.
+     * @throws \OneLogin\Saml2\Error                  If SAML LogoutRequest/LogoutResponse wasn't found.
+     * @throws \Aacotroneo\Saml2\Exceptions\Exception On any other error.
      *
      * @return string|null If $stay is TRUE, a string with the SLO URL + LogoutRequest + parameters is returned instead.
      */
@@ -194,8 +190,7 @@ class Saml2
         $url = $auth->processSLO($keepLocalSession, $requestId, $paramsFromServer, $callback, $stay);
         $errorException = $auth->getLastErrorException();
         if (!empty($errorException)) {
-            // @TODO: Replace with custom exception.
-            throw new RuntimeException($auth->getLastErrorReason(), 0, $errorException);
+            throw new Exception($auth->getLastErrorReason(), 0, $errorException);
         }
 
         return $url;

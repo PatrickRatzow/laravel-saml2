@@ -8,7 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
-use OutOfRangeException;
+use Aacotroneo\Saml2\Exceptions\ProviderNotFoundException;
 use Aacotroneo\Saml2\Facades\Saml2;
 
 class Saml2Controller extends Controller
@@ -129,7 +129,7 @@ class Saml2Controller extends Controller
             report($e);
             if (empty($errorPath)) {
                 $message = sprintf('[%d] %s', $e->getCode(), $e->getMessage());
-                $status = $e instanceof OutOfRangeException ? 404 : 422;
+                $status = $e instanceof ProviderNotFoundException ? 404 : 422;
                 abort($status, $message);
             }
             session()->flash('saml2_error', $e->getMessage());

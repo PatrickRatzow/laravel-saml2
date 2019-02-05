@@ -2,8 +2,9 @@
 
 namespace Aacotroneo\Saml2;
 
-use OutOfRangeException;
-use RuntimeException;
+use Aacotroneo\Saml2\Exceptions\FileNotReadableException;
+use Aacotroneo\Saml2\Exceptions\IdentityProviderNotFoundException;
+use Aacotroneo\Saml2\Exceptions\ServiceProviderNotFoundException;
 use Aacotroneo\Saml2\Http\Controllers\Saml2Controller;
 
 class Config
@@ -72,8 +73,10 @@ class Config
      *
      * @param string|null $slug Service Provider slug.
      *
-     * @throws \OutOfRangeException If no Service Provider was found with the specified slug.
-     * @throws \OutOfRangeException If no Identity Provider was found with the specified slug.
+     * @throws \Aacotroneo\Saml2\Exceptions\ServiceProviderNotFoundException
+     *     If no Service Provider was found with the specified slug.
+     * @throws \Aacotroneo\Saml2\Exceptions\IdentityProviderNotFoundException
+     *     If no Identity Provider was found with the specified slug.
      *
      * @return array
      */
@@ -87,12 +90,10 @@ class Config
         }
 
         if (!isset($sps[$slug])) {
-            // @TODO: Replace with custom exception.
-            throw new OutOfRangeException('Invalid Service Provider slug: ' . $slug);
+            throw new ServiceProviderNotFoundException($slug);
         }
         if (!isset($idps[$slug])) {
-            // @TODO: Replace with custom exception.
-            throw new OutOfRangeException('Invalid Identity Provider slug: ' . $slug);
+            throw new IdentityProviderNotFoundException($slug);
         }
 
         // Grab and process providers.
@@ -168,7 +169,7 @@ class Config
      * @param string $path
      * @param string $passphrase
      *
-     * @throws \RuntimeException If the private key couldn't be read.
+     * @throws \Aacotroneo\Saml2\Exceptions\FileNotReadableException If the private key could not be read.
      *
      * @return string
      */
@@ -176,8 +177,7 @@ class Config
     {
         $resource = openssl_pkey_get_private('file://' . $path, $passphrase);
         if (empty($resource)) {
-            // @TODO: Replace with custom exception.
-            throw new RuntimeException(sprintf("Could not read private key-file at path: '%s'", $path));
+            throw new FileNotReadableException($path);
         }
         openssl_pkey_export($resource, $content);
         openssl_pkey_free($resource);
@@ -190,7 +190,7 @@ class Config
      *
      * @param string $path
      *
-     * @throws \RuntimeException If the certificate couldn't be read.
+     * @throws \Aacotroneo\Saml2\Exceptions\FileNotReadableException If the certificate could not be read.
      *
      * @return string
      */
@@ -198,8 +198,7 @@ class Config
     {
         $resource = openssl_x509_read('file://' . $path);
         if (empty($resource)) {
-            // @TODO: Replace with custom exception.
-            throw new RuntimeException(sprintf("Could not read certificate-file at path: '%s'", $path));
+            throw new FileNotReadableException($path);
         }
         openssl_x509_export($resource, $content);
         openssl_x509_free($resource);

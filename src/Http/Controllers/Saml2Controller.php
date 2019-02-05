@@ -23,7 +23,7 @@ class Saml2Controller extends Controller
      */
     public function acs(Request $request, string $slug = null): RedirectResponse
     {
-        return $this->rescue(function () use ($slug) {
+        return $this->rescue(function () use ($request, $slug) {
             Saml2::acs($slug, $request->input('requestId'));
 
             $intended = $request->input('RelayState');

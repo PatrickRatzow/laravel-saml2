@@ -32,6 +32,11 @@
             "Aacotroneo\\Saml2\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Aacotroneo\\Saml2\\Tests\\": "tests"
+        }
+    },
     "extra": {
         "laravel": {
             "providers": [

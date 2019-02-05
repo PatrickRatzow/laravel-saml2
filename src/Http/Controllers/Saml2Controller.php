@@ -19,9 +19,9 @@ class Saml2Controller extends Controller
      * @param \Illuminate\Http\Request $request Request instance.
      * @param string|null              $slug    Service Provider slug.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function acs(Request $request, string $slug = null): Response
+    public function acs(Request $request, string $slug = null): RedirectResponse
     {
         return $this->rescue(function () use ($slug) {
             Saml2::acs($slug, $request->input('requestId'));

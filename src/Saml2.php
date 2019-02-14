@@ -229,17 +229,30 @@ class Saml2
     /**
      * Get cookie - optionally a specific key if provided.
      *
-     * @param string|null $slug Service Provider slug.
-     * @param string|null $key  Data key to retrieve.
+     * @param string|null $slug    Service Provider slug.
+     * @param string|null $key     Data key to retrieve.
+     * @param mixed       $default Default key value.
      *
      * @return mixed
      */
-    public function getCookie(?string $slug, string $key = null)
+    public function getCookie(?string $slug, string $key = null, $default = null)
     {
         $cookie = Cookie::get($this->resolveCookieName($slug));
         $data = is_string($cookie) ? unserialize($cookie) : [];
 
-        return $key ? ($data[$key] ?? null) : $data;
+        return $key ? ($data[$key] ?? $default) : $data;
+    }
+
+    /**
+     * Whether cookie exist.
+     *
+     * @param stringünull $slug Service Provider slug.
+     *
+     * @return bool
+     */
+    public function hasCookie(?string $slug): bool
+    {
+        return Cookie::has($this->resolveCookieName($slug));
     }
 
     /**

@@ -108,6 +108,10 @@ class User implements Arrayable, Jsonable, JsonSerializable
     {
         foreach ($map as $key => &$value) {
             $value = $this->getAttribute($value);
+            // Collapse arrays to values for single zero-indexed entries.
+            if (is_array($value) && count($value) === 1 && isset($value[0])) {
+                $value = reset($value);
+            }
         }
 
         return $this->mapped = $map;

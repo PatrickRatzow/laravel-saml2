@@ -31,8 +31,9 @@ class Saml2Controller extends Controller
                 $intended = Saml2::config()->route_login;
             }
 
-            // Set session cookie.
-            Saml2::setCookie($slug, $user->toArray());
+            // Save name ID and session index to cookie.
+            $data = array_only($user->toArray(), ['name_id', 'session_index']);
+            Saml2::setCookie($slug, $data);
 
             return redirect($intended);
         }, Saml2::config()->route_error);

@@ -24,12 +24,15 @@ class Saml2Controller extends Controller
     public function acs(Request $request, string $slug = null): RedirectResponse
     {
         return $this->rescue(function () use ($request, $slug) {
-            Saml2::acs($slug, $request->input('requestId'));
+            $user = Saml2::acs($slug, $request->input('requestId'));
 
             $intended = $request->input('RelayState');
             if (empty($intended) || url()->full() === $intended) {
                 $intended = Saml2::config()->route_login;
             }
+
+            // Set session cookie.
+            Saml2::setCookie($slug, $user->toArray());
 
             return redirect($intended);
         }, Saml2::config()->route_error);
@@ -64,9 +67,9 @@ class Saml2Controller extends Controller
     public function logout(Request $request, string $slug = null): RedirectResponse
     {
         return $this->rescue(function () use ($request, $slug) {
-            $nameId = $request->input('nameId');
-            $returnTo = $request->input('returnTo');
-            $sessionIndex = $request->input('sessionIndex');
+            $nameId = $request->input('nameId') ?: Saml2::getCookie($slug, 'name_id');
+            $returnTo = $request->input('returnTo') ?: Saml2::config()->route_logout;
+            $sessionIndex = $request->input('sessionIndex') ?: Saml2::getCookie($slug, 'session_index');
             // We want to handle the redirect ourselves.
             // We should end up in the 'sls' endpoint.
             $url = Saml2::logout($slug, $returnTo, [], $nameId, $sessionIndex, true, null, null, null);
@@ -106,6 +109,9 @@ class Saml2Controller extends Controller
             $requestId = $request->input('requestId');
             // We want to handle the redirect ourselves.
             $url = Saml2::sls($slug, false, $requestId, Saml2::config()->params_from_server, true);
+
+            // Forget session cookie.
+            Saml2::forgetCookie($slug);
 
             return redirect($url ?: Saml2::config()->route_logout);
         });

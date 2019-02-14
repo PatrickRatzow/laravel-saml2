@@ -2,6 +2,10 @@
 
 namespace Aacotroneo\Saml2\Models;
 
+use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Contracts\Support\Jsonable;
+use JsonSerializable;
+
 use OneLogin\Saml2\Auth;
 
 /**
@@ -34,7 +38,7 @@ use OneLogin\Saml2\Auth;
  * @method string|null getSessionIndex()
  * @method bool isAuthenticated()
  */
-class User
+class User implements Arrayable, Jsonable, JsonSerializable
 {
     /**
      * OneLogin Auth instance.
@@ -152,5 +156,41 @@ class User
         }
 
         trigger_error('Call to undefined method ' . static::class . '::' . $name . '()', E_USER_ERROR);
+    }
+
+    /**
+     * Get the instance as an array.
+     *
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return collect($this->proxy)
+            ->map(function (string $method) {
+                return call_user_func([$this->auth, $method]);
+            })
+            ->toArray();
+    }
+
+    /**
+     * Get the data as JSON.
+     *
+     * @param int $options
+     *
+     * @return string
+     */
+    public function toJson($options = 0): string
+    {
+        return json_encode($this->jsonSerialize(), $options);
+    }
+
+    /**
+     * Convert the data into something JSON serializable.
+     *
+     * @return array
+     */
+    public function jsonSerialize(): array
+    {
+        return $this->toArray();
     }
 }

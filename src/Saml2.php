@@ -2,6 +2,7 @@
 
 namespace Aacotroneo\Saml2;
 
+use Illuminate\Support\Facades\Cookie;
 use OneLogin\Saml2\Auth;
 use OneLogin\Saml2\Error;
 use OneLogin\Saml2\Utils;
@@ -54,9 +55,9 @@ class Saml2
      *
      * @throws \Aacotroneo\Saml2\Exceptions\Exception On any error.
      *
-     * @return void
+     * @return \Aacotroneo\Saml2\Models\User
      */
-    public function acs(string $slug = null, string $requestId = null): void
+    public function acs(string $slug = null, string $requestId = null): User
     {
         $auth = $this->loadAuth($slug);
         $auth->processResponse($requestId);
@@ -65,7 +66,10 @@ class Saml2
             throw new Exception($auth->getLastErrorReason(), 0, $errorException);
         }
 
-        event(new LoginEvent($this->config->resolveOneLoginSlug($slug), new User($auth)));
+        $user = new User($auth);
+        event(new LoginEvent($this->config->resolveOneLoginSlug($slug), $user));
+
+        return $user;
     }
 
     /**
@@ -206,5 +210,59 @@ class Saml2
     public function loadAuth(string $slug = null): Auth
     {
         return new Auth($this->config->getOneLogin($slug));
+    }
+
+    /**
+     * Set cookie.
+     *
+     * @param string|null $slug    Service Provider slug.
+     * @param array       $data    Serializable data.
+     * @param int         $minutes Cookie lifetime.
+     *
+     * @return void
+     */
+    public function setCookie(?string $slug, array $data, int $minutes = 0): void
+    {
+        Cookie::queue($this->resolveCookieName($slug), serialize($data), $minutes);
+    }
+
+    /**
+     * Get cookie - optionally a specific key if provided.
+     *
+     * @param string|null $slug Service Provider slug.
+     * @param string|null $key  Data key to retrieve.
+     *
+     * @return mixed
+     */
+    public function getCookie(?string $slug, string $key = null)
+    {
+        $cookie = Cookie::get($this->resolveCookieName($slug));
+        $data = is_string($cookie) ? unserialize($cookie) : [];
+
+        return $key ? ($data[$key] ?? null) : $data;
+    }
+
+    /**
+     * Forget cookie.
+     *
+     * @param stringünull $slug Service Provider slug.
+     *
+     * @return void
+     */
+    public function forgetCookie(?string $slug): void
+    {
+        Cookie::forget($this->resolveCookieName($slug));
+    }
+
+    /**
+     * Resolve cookie name from Service Provider slug.
+     *
+     * @param string|null $slug Service Provider slug.
+     *
+     * @return string
+     */
+    public function resolveCookieName(?string $slug): string
+    {
+        return 'saml2_' . ($this->config->resolveOneLoginSlug($slug) ?: 'default');
     }
 }

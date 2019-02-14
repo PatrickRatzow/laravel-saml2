@@ -21,7 +21,7 @@ return [
     // the BaseURL of the view that process the SAML Message.
     // Ex. http://sp.example.com/
     //     http://example.com/sp/
-    'baseurl' => env('APP_URL'),
+    # 'baseurl' => env('APP_URL'),
 
     /*
     |--------------------------------------------------------------------------

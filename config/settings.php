@@ -26,7 +26,12 @@ return [
     'routes_controller' => null,
 
     // What middleware should be applied to the routes.
-    'routes_middleware' => [],
+    'routes_middleware' => [
+        # App\Http\Middleware\EncryptCookies::class,
+        # Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+        # Illuminate\Session\Middleware\StartSession::class,
+        # Illuminate\View\Middleware\ShareErrorsFromSession::class,
+    ],
 
     // Where to redirect users after login.
     // Route name is assumed, unless it contains a slash (/).

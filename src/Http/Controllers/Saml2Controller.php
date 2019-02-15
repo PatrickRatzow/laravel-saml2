@@ -8,11 +8,37 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Arr;
 use Aacotroneo\Saml2\Exceptions\ProviderNotFoundException;
 use Aacotroneo\Saml2\Facades\Saml2;
 
 class Saml2Controller extends Controller
 {
+    /**
+     * Config instance.
+     *
+     * @var \Aacotroneo\Saml2\Config
+     */
+    protected $config;
+
+    /**
+     * Cookie instance.
+     *
+     * @var \Aacotroneo\Saml2\Cookie
+     */
+    protected $cookie;
+
+    /**
+     * Constructor.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->config = Saml2::config();
+        $this->cookie = Saml2::cookie();
+    }
+
     /**
      * Handle incoming SAML2 assertion request.
      *
@@ -28,15 +54,15 @@ class Saml2Controller extends Controller
 
             $intended = $request->input('RelayState');
             if (empty($intended) || url()->full() === $intended) {
-                $intended = Saml2::config()->route_login;
+                $intended = $this->config->route_login;
             }
 
             // Save name ID and session index to cookie.
-            $data = array_only($user->toArray(), ['name_id', 'session_index']);
-            Saml2::setCookie($slug, $data);
+            $data = Arr::only($user->toArray(), ['name_id', 'session_index']);
+            $this->cookie->set($slug, $data);
 
             return redirect($intended);
-        }, Saml2::config()->route_error);
+        }, $this->config->route_error);
     }
 
     /**
@@ -51,7 +77,7 @@ class Saml2Controller extends Controller
     {
         return $this->rescue(function () use ($slug) {
             // We want to handle the redirect ourselves.
-            $url = Saml2::login($slug, Saml2::config()->route_login, [], false, false, true, true);
+            $url = Saml2::login($slug, $this->config->route_login, [], false, false, true, true);
 
             return redirect($url);
         });
@@ -68,9 +94,9 @@ class Saml2Controller extends Controller
     public function logout(Request $request, string $slug = null): RedirectResponse
     {
         return $this->rescue(function () use ($request, $slug) {
-            $nameId = $request->input('nameId') ?: Saml2::getCookie($slug, 'name_id');
-            $returnTo = $request->input('returnTo') ?: Saml2::config()->route_logout;
-            $sessionIndex = $request->input('sessionIndex') ?: Saml2::getCookie($slug, 'session_index');
+            $nameId = $request->input('nameId') ?: $this->cookie->get($slug, 'name_id');
+            $returnTo = $request->input('returnTo') ?: $this->config->route_logout;
+            $sessionIndex = $request->input('sessionIndex') ?: $this->cookie->get($slug, 'session_index');
             // We want to handle the redirect ourselves.
             // We should end up in the 'sls' endpoint.
             $url = Saml2::logout($slug, $returnTo, [], $nameId, $sessionIndex, true, null, null, null);
@@ -109,12 +135,12 @@ class Saml2Controller extends Controller
         return $this->rescue(function () use ($request, $slug) {
             $requestId = $request->input('requestId');
             // We want to handle the redirect ourselves.
-            $url = Saml2::sls($slug, false, $requestId, Saml2::config()->params_from_server, true);
+            $url = Saml2::sls($slug, false, $requestId, $this->config->params_from_server, true);
 
             // Forget session cookie.
-            Saml2::forgetCookie($slug);
+            $this->cookie->forget($slug);
 
-            return redirect($url ?: Saml2::config()->route_logout);
+            return redirect($url ?: $this->config->route_logout);
         });
     }
 

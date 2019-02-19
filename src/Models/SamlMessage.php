@@ -95,6 +95,20 @@ class SamlMessage extends Model
     }
 
     /**
+     * Get unique entity.
+     *
+     * @param string $slug       Service Provider slug.
+     * @param string $message_id Unique message ID.
+     *
+     * @return self|null
+     */
+    public static function unique(string $slug, string $message_id): ?self
+    {
+        return static::where('slug', '=', $slug)->where('message_id', '=', $message_id)->first();
+    }
+
+
+    /**
      * Whether a unique entity exists.
      *
      * @param string $slug       Service Provider slug.

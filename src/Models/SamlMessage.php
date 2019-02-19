@@ -66,11 +66,11 @@ class SamlMessage extends Model
     /**
      * Get message content.
      *
-     * @param array|null $value
+     * @param string|null $value
      *
      * @return array|null
      */
-    public function getContentAttribute(?array $value): ?array
+    public function getContentAttribute(?string $value): ?array
     {
         if (! empty($value) && Saml2::config()->secure_message_content) {
             $value = decrypt($value);

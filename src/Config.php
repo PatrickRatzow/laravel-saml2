@@ -151,18 +151,6 @@ class Config
     }
 
     /**
-     * Resolve slug token from Service Provider slug.
-     *
-     * @param string|null $slug Service Provider slug.
-     *
-     * @return string
-     */
-    public function resolveSlugToken(string $slug = null): string
-    {
-        return 'saml2_' . ($this->resolveOneLoginSlug($slug) ?: 'default');
-    }
-
-    /**
      * Format an URL depending on whether it's a named route or a specific path.
      *
      * @param string $path

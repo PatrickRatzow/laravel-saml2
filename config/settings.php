@@ -37,13 +37,23 @@ return [
     // Route name is assumed, unless it contains a slash (/).
     'route_login' => '/',
 
+    // Special middleware applied to the login route.
+    'route_login_middleware' => [],
+
     // Where to redirect users after logout.
     // Route name is assumed, unless it contains a slash (/).
     'route_logout' => '/',
 
+    // Special middleware applied to the logout route.
+    'route_logout_middleware' => [],
+
     // Where to redirect users on errors.
     // Route name is assumed, unless it contains a slash (/).
     'route_error' => '/',
+
+    // Will secure 'name_id' and 'content' in SamlMessage using built-in
+    // encrypt/decrypt functions to hide potential sensitive information in database.
+    'secure_message_content' => true,
 
     // Indicates how the parameters will be
     // retrieved from the SLS request for signature validation.

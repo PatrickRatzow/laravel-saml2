@@ -1,0 +1,35 @@
+<?php
+
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+
+class CreateSamlMessageTable extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up()
+    {
+        Schema::create('saml_messages', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('type', 6);
+            $table->string('slug', 20);
+            $table->string('message_id');
+            $table->text('name_id')->nullable();
+            $table->text('session_index')->nullable();
+            $table->mediumText('content')->nullable();
+            $table->timestamps();
+
+            $table->unique(['slug', 'message_id']);
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down()
+    {
+        Schema::dropIfExists('saml_messages');
+    }
+}

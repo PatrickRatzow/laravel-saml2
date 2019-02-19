@@ -1,18 +1,18 @@
 <?php
 
-namespace Aacotroneo\Saml2\Events;
+namespace Aacotroneo\Saml2\Exceptions;
 
-class LogoutEvent
+class MessageExistsException extends Exception
 {
     /**
-     * Service Provider slug.
+     * Provider slug.
      *
      * @var string|null
      */
     protected $slug;
 
     /**
-     * Last message ID.
+     * Message ID.
      *
      * @var string
      */
@@ -21,13 +21,15 @@ class LogoutEvent
     /**
      * Constructor.
      *
-     * @param string|null $slug       Service Provider slug.
-     * @param string      $message_id Last message ID.
+     * @param string $slug       Service Provider slug.
+     * @param string $message_id Message ID.
      *
      * @return void
      */
-    public function __construct(?string $slug, string $message_id)
+    public function __construct(string $slug, string $message_id)
     {
+        parent::__construct(sprintf("Message with slug '%s' and message ID '%s' already exists", $slug, $message_id));
+
         $this->slug = $slug;
         $this->message_id = $message_id;
     }
@@ -35,15 +37,15 @@ class LogoutEvent
     /**
      * Get Service Provider slug.
      *
-     * @return string|null
+     * @return string
      */
-    public function getSlug(): ?string
+    public function getSlug(): string
     {
         return $this->slug;
     }
 
     /**
-     * Get last message ID.
+     * Get message ID.
      *
      * @return string
      */

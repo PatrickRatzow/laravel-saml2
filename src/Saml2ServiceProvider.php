@@ -22,11 +22,16 @@ class Saml2ServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->publishes([
-            __DIR__ . '/../config/settings.php' => config_path('saml2/settings.php'),
-            __DIR__ . '/../config/onelogin.php' => config_path('saml2/onelogin.php'),
-            __DIR__ . '/../config/sps.php'      => config_path('saml2/sps.php'),
-            __DIR__ . '/../config/idps.php'     => config_path('saml2/idps.php'),
+            __DIR__ . '/../config/' => config_path('saml2'),
         ], 'config');
+
+        if (! class_exists('CreateSamlMessageTable')) {
+            $this->publishes([
+                __DIR__ . '/../database/migrations/create_saml_message_table.php.stub' => database_path(
+                    'migrations/' . date('Y_m_d_His', time()) . '_create_saml_message_table.php'
+                ),
+            ], 'migrations');
+        }
 
         if (app('saml2')->config()->setup_routes) {
             $this->loadRoutesFrom(__DIR__ . '/../routes/routes.php');

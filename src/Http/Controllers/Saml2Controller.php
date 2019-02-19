@@ -22,13 +22,6 @@ class Saml2Controller extends Controller
     protected $config;
 
     /**
-     * Cookie instance.
-     *
-     * @var \Aacotroneo\Saml2\Cookie
-     */
-    protected $cookie;
-
-    /**
      * Constructor.
      *
      * @return void
@@ -36,7 +29,6 @@ class Saml2Controller extends Controller
     public function __construct()
     {
         $this->config = Saml2::config();
-        $this->cookie = Saml2::cookie();
     }
 
     /**
@@ -50,16 +42,12 @@ class Saml2Controller extends Controller
     public function acs(Request $request, string $slug = null): RedirectResponse
     {
         return $this->rescue(function () use ($request, $slug) {
-            $user = Saml2::acs($slug, $request->input('requestId'));
+            Saml2::acs($slug, $request->input('requestId'));
 
             $intended = $request->input('RelayState');
             if (empty($intended) || url()->full() === $intended) {
                 $intended = $this->config->route_login;
             }
-
-            // Save name ID and session index to cookie.
-            $data = Arr::only($user->toArray(), ['name_id', 'session_index']);
-            $this->cookie->set($slug, $data);
 
             return redirect($intended);
         }, $this->config->route_error);
@@ -94,12 +82,12 @@ class Saml2Controller extends Controller
     public function logout(Request $request, string $slug = null): RedirectResponse
     {
         return $this->rescue(function () use ($request, $slug) {
-            $nameId = $request->input('nameId') ?: $this->cookie->get($slug, 'name_id');
-            $returnTo = $request->input('returnTo') ?: $this->config->route_logout;
-            $sessionIndex = $request->input('sessionIndex') ?: $this->cookie->get($slug, 'session_index');
+            $name_id = $request->input('nameId');
+            $return_to = $request->input('returnTo');
+            $session_index = $request->input('sessionIndex');
             // We want to handle the redirect ourselves.
             // We should end up in the 'sls' endpoint.
-            $url = Saml2::logout($slug, $returnTo, [], $nameId, $sessionIndex, true, null, null, null);
+            $url = Saml2::logout($slug, $return_to, [], $name_id, $session_index, true, null, null, null);
 
             return redirect($url);
         });
@@ -133,12 +121,9 @@ class Saml2Controller extends Controller
     public function sls(Request $request, string $slug = null): RedirectResponse
     {
         return $this->rescue(function () use ($request, $slug) {
-            $requestId = $request->input('requestId');
+            $request_id = $request->input('requestId');
             // We want to handle the redirect ourselves.
-            $url = Saml2::sls($slug, false, $requestId, $this->config->params_from_server, true);
-
-            // Forget session cookie.
-            $this->cookie->forget($slug);
+            $url = Saml2::sls($slug, false, $request_id, $this->config->params_from_server, true);
 
             return redirect($url ?: $this->config->route_logout);
         });
@@ -146,21 +131,21 @@ class Saml2Controller extends Controller
 
     /**
      * Capture any exceptions and return them as an HTTP error.
-     * If $errorPath is provided, the user will be redirected to that URL instead,
+     * If $error_path is provided, the user will be redirected to that URL instead,
      * and the error will be flashed in session as 'saml2_error'.
      *
      * @param \Closure    $callback
-     * @param string|null $errorPath
+     * @param string|null $error_path
      *
      * @return mixed
      */
-    protected function rescue(Closure $callback, string $errorPath = null)
+    protected function rescue(Closure $callback, string $error_path = null)
     {
         try {
             return $callback();
         } catch (Exception $e) {
             report($e);
-            if (empty($errorPath)) {
+            if (empty($error_path)) {
                 $message = sprintf('[%d] %s', $e->getCode(), $e->getMessage());
                 $status = $e instanceof ProviderNotFoundException ? 404 : 422;
                 abort($status, $message);
@@ -168,6 +153,6 @@ class Saml2Controller extends Controller
             session()->flash('saml2_error', $e->getMessage());
         }
 
-        return redirect($errorPath);
+        return redirect($error_path);
     }
 }

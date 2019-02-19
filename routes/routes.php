@@ -5,11 +5,13 @@ Route::group([
     'prefix'     => Saml2::config()->routes_prefix,
     'middleware' => Saml2::config()->routes_middleware,
 ], function () {
-    $controller = Saml2::config()->routes_controller;
+    // Grab config.
+    $config = Saml2::config();
+    $controller = $config->routes_controller;
 
     Route::post('acs/{slug?}', $controller . '@acs')->name('acs');
-    Route::get('login/{slug?}', $controller . '@login')->name('login');
-    Route::get('logout/{slug?}', $controller . '@logout')->name('logout');
+    Route::get('login/{slug?}', $controller . '@login')->middleware($config->route_login_middleware)->name('login');
+    Route::get('logout/{slug?}', $controller . '@logout')->middleware($config->route_logout_middleware)->name('logout');
     Route::get('metadata/{slug?}', $controller . '@metadata')->name('metadata');
     Route::get('sls/{slug?}', $controller . '@sls')->name('sls');
 });

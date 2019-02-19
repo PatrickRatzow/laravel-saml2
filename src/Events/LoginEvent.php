@@ -2,7 +2,7 @@
 
 namespace Aacotroneo\Saml2\Events;
 
-use Aacotroneo\Saml2\Models\User;
+use Aacotroneo\Saml2\User;
 
 class LoginEvent
 {
@@ -14,23 +14,32 @@ class LoginEvent
     protected $slug;
 
     /**
+     * Last message ID.
+     *
+     * @var string
+     */
+    protected $message_id;
+
+    /**
      * Saml2 user instance.
      *
-     * @var \Aacotroneo\Saml2\Models\User
+     * @var \Aacotroneo\Saml2\User
      */
     protected $user;
 
     /**
      * Constructor.
      *
-     * @param string|null                   $slug Service Provider slug.
-     * @param \Aacotroneo\Saml2\Models\User $user Saml2 user instance.
+     * @param string|null            $slug       Service Provider slug.
+     * @param string                 $message_id Last message ID.
+     * @param \Aacotroneo\Saml2\User $user       Saml2 user instance.
      *
      * @return void
      */
-    public function __construct(?string $slug, User $user)
+    public function __construct(?string $slug, string $message_id, User $user)
     {
         $this->slug = $slug;
+        $this->message_id = $message_id;
         $this->user = $user;
     }
 
@@ -45,9 +54,19 @@ class LoginEvent
     }
 
     /**
+     * Get last message ID.
+     *
+     * @return string
+     */
+    public function getMessageId(): string
+    {
+        return $this->message_id;
+    }
+
+    /**
      * Get Saml2 user.
      *
-     * @return \Aacotroneo\Saml2\Models\User
+     * @return \Aacotroneo\Saml2\User
      */
     public function getUser(): User
     {

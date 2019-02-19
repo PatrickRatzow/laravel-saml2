@@ -8,7 +8,6 @@ use OneLogin\Saml2\Utils;
 use Aacotroneo\Saml2\Events\LoginEvent;
 use Aacotroneo\Saml2\Events\LogoutEvent;
 use Aacotroneo\Saml2\Exceptions\Exception;
-use Aacotroneo\Saml2\Models\User;
 
 class Saml2
 {
@@ -18,20 +17,6 @@ class Saml2
      * @var \Aacotroneo\Saml2\Config
      */
     protected $config;
-
-    /**
-     * Cookie instance.
-     *
-     * @var \Aacotroneo\Saml2\Cookie
-     */
-    protected $cookie;
-
-    /**
-     * Session instance.
-     *
-     * @var \Aacotroneo\Saml2\Session
-     */
-    protected $session;
 
     /**
      * Constructor.
@@ -61,46 +46,26 @@ class Saml2
     }
 
     /**
-     * Get cookie instance.
-     *
-     * @return \Aacotroneo\Saml2\Cookie
-     */
-    public function cookie(): Cookie
-    {
-        return $this->cookie ?: ($this->cookie = new Cookie($this->config));
-    }
-
-    /**
-     * Get session instance.
-     *
-     * @return \Aacotroneo\Saml2\Session
-     */
-    public function session(): Session
-    {
-        return $this->session ?: ($this->session = new Session($this->config));
-    }
-
-    /**
      * Process Assertion Consumer Services response from Identity Provider.
      *
-     * @param string|null $slug      Service Provider slug.
-     * @param string|null $requestId The ID of the AuthNRequest sent by this SP to the IdP.
+     * @param string|null $slug       Service Provider slug.
+     * @param string|null $request_id The ID of the AuthNRequest sent by this SP to the IdP.
      *
      * @throws \Aacotroneo\Saml2\Exceptions\Exception On any error.
      *
-     * @return \Aacotroneo\Saml2\Models\User
+     * @return \Aacotroneo\Saml2\User
      */
-    public function acs(string $slug = null, string $requestId = null): User
+    public function acs(string $slug = null, string $request_id = null): User
     {
         $auth = $this->loadAuth($slug);
-        $auth->processResponse($requestId);
-        $errorException = $auth->getLastErrorException();
-        if (!empty($errorException)) {
-            throw new Exception($auth->getLastErrorReason(), 0, $errorException);
+        $auth->processResponse($request_id);
+        $error_exception = $auth->getLastErrorException();
+        if (!empty($error_exception)) {
+            throw new Exception($auth->getLastErrorReason(), 0, $error_exception);
         }
 
         $user = new User($auth);
-        event(new LoginEvent($this->config->resolveOneLoginSlug($slug), $user));
+        event(new LoginEvent($this->config->resolveOneLoginSlug($slug), $auth->getLastMessageId(), $user));
 
         return $user;
     }
@@ -108,47 +73,47 @@ class Saml2
     /**
      * Initiate the Single Sign-On process.
      *
-     * @param string|null $slug            Service Provider slug.
-     * @param string|null $returnTo        The target URL the user should be returned to after login.
-     * @param array       $parameters      Extra parameters to be added to the GET request.
-     * @param bool        $forceAuthn      When TRUE the AuthNRequest will set the ForceAuthn='true'.
-     * @param bool        $isPassive       When TRUE the AuthNRequest will set the IsPassive='true'.
-     * @param bool        $stay            TRUE if we want to stay (returns the URL string), FALSE to redirect.
-     * @param bool        $setNameIdPolicy When TRUE the AuthNRequest will set a NameIDPolicy element.
+     * @param string|null $slug               Service Provider slug.
+     * @param string|null $return_to          The target URL the user should be returned to after login.
+     * @param array       $parameters         Extra parameters to be added to the GET request.
+     * @param bool        $force_authn        When TRUE the AuthNRequest will set the ForceAuthn='true'.
+     * @param bool        $is_passive         When TRUE the AuthNRequest will set the IsPassive='true'.
+     * @param bool        $stay               TRUE to stay (returns the URL string), FALSE to redirect.
+     * @param bool        $set_name_id_policy When TRUE the AuthNRequest will set a NameIDPolicy element.
      *
      * @return string|null If $stay is TRUE, a string with the SSO URL + LogoutRequest + parameters is returned instead.
      */
     public function login(
         string $slug = null,
-        string $returnTo = null,
+        string $return_to = null,
         array $parameters = [],
-        bool $forceAuthn = false,
-        bool $isPassive = false,
+        bool $force_authn = false,
+        bool $is_passive = false,
         bool $stay = false,
-        bool $setNameIdPolicy = true
+        bool $set_name_id_policy = true
     ): ?string {
         return $this->loadAuth($slug)->login(
-            $returnTo,
+            $return_to,
             $parameters,
-            $forceAuthn,
-            $isPassive,
+            $force_authn,
+            $is_passive,
             $stay,
-            $setNameIdPolicy
+            $set_name_id_policy
         );
     }
 
     /**
      * Initiate the Single Logout process.
      *
-     * @param string|null $slug                  Service Provider slug.
-     * @param string|null $returnTo              The target URL the user should be returned to after logout.
-     * @param array       $parameters            Extra parameters to be added to the GET.
-     * @param string|null $nameId                The NameID that will be set in the LogoutRequest.
-     * @param string|null $sessionIndex          The SessionIndex (taken from the SAML Response in the SSO process).
-     * @param bool        $stay                  TRUE if we want to stay (returns the URL string), FALSE to redirect.
-     * @param string|null $nameIdFormat          The NameID Format will be set in the LogoutRequest.
-     * @param string|null $nameIdNameQualifier   The NameID NameQualifier will be set in the LogoutRequest.
-     * @param string|null $nameIdSPNameQualifier The NameID SP NameQualifier will be set in the LogoutRequest.
+     * @param string|null $slug                      Service Provider slug.
+     * @param string|null $return_to                 The target URL the user should be returned to after logout.
+     * @param array       $parameters                Extra parameters to be added to the GET.
+     * @param string|null $name_id                   The NameID that will be set in the LogoutRequest.
+     * @param string|null $session_index             The SessionIndex (taken from the SAML Response in the SSO process).
+     * @param bool        $stay                      TRUE to stay (returns the URL string), FALSE to redirect.
+     * @param string|null $name_id_format            The NameID Format will be set in the LogoutRequest.
+     * @param string|null $name_id_name_qualifier    The NameID NameQualifier will be set in the LogoutRequest.
+     * @param string|null $name_id_sp_name_qualifier The NameID SP NameQualifier will be set in the LogoutRequest.
      *
      * @throws \OneLogin\Saml2\Error If Identity Provider doesn't support Single Logout.
      *
@@ -156,24 +121,24 @@ class Saml2
      */
     public function logout(
         string $slug = null,
-        string $returnTo = null,
+        string $return_to = null,
         array $parameters = [],
-        string $nameId = null,
-        string $sessionIndex = null,
+        string $name_id = null,
+        string $session_index = null,
         bool $stay = false,
-        string $nameIdFormat = null,
-        string $nameIdNameQualifier = null,
-        string $nameIdSPNameQualifier = null
+        string $name_id_format = null,
+        string $name_id_name_qualifier = null,
+        string $name_id_sp_name_qualifier = null
     ): ?string {
         return $this->loadAuth($slug)->logout(
-            $returnTo,
+            $return_to,
             $parameters,
-            $nameId,
-            $sessionIndex,
+            $name_id,
+            $session_index,
             $stay,
-            $nameIdFormat,
-            $nameIdNameQualifier,
-            $nameIdSPNameQualifier
+            $name_id_format,
+            $name_id_name_qualifier,
+            $name_id_sp_name_qualifier
         );
     }
 
@@ -202,11 +167,11 @@ class Saml2
     /**
      * Process Single Logout request/response.
      *
-     * @param  string|null $slug             Service Provider slug.
-     * @param  bool        $keepLocalSession When FALSE will destroy the local session, otherwise will keep it
-     * @param  string|null $requestId        The ID of the LogoutRequest sent by this SP to the IdP.
-     * @param  bool        $paramsFromServer TRUE if we want to use parameters from $_SERVER to validate the signature.
-     * @param  bool        $stay             TRUE if we want to stay (returns the URL string), FALSE to redirect.
+     * @param  string|null $slug               Service Provider slug.
+     * @param  bool        $keep_local_session When FALSE will destroy the local session, otherwise will keep it
+     * @param  string|null $request_id         The ID of the LogoutRequest sent by this SP to the IdP.
+     * @param  bool        $params_from_server TRUE to use parameters from $_SERVER to validate the signature.
+     * @param  bool        $stay               TRUE to stay (returns the URL string), FALSE to redirect.
      *
      * @throws \OneLogin\Saml2\Error                  If SAML LogoutRequest/LogoutResponse wasn't found.
      * @throws \Aacotroneo\Saml2\Exceptions\Exception On any other error.
@@ -215,19 +180,28 @@ class Saml2
      */
     public function sls(
         string $slug = null,
-        bool $keepLocalSession = false,
-        string $requestId = null,
-        bool $paramsFromServer = false,
+        bool $keep_local_session = false,
+        string $request_id = null,
+        bool $params_from_server = false,
         bool $stay = false
     ): ?string {
-        $callback = function () use ($slug) {
-            event(new LogoutEvent($this->config->resolveOneLoginSlug($slug)));
-        };
+        $success = false;
         $auth = $this->loadAuth($slug);
-        $url = $auth->processSLO($keepLocalSession, $requestId, $paramsFromServer, $callback, $stay);
-        $errorException = $auth->getLastErrorException();
-        if (!empty($errorException)) {
-            throw new Exception($auth->getLastErrorReason(), 0, $errorException);
+        $url = $auth->processSLO(
+            $keep_local_session,
+            $request_id,
+            $params_from_server,
+            function () use (&$success) {
+                $success = true;
+            },
+            $stay
+        );
+        $error_exception = $auth->getLastErrorException();
+        if (!empty($error_exception)) {
+            throw new Exception($auth->getLastErrorReason(), 0, $error_exception);
+        }
+        if ($success) {
+            event(new LogoutEvent($this->config->resolveOneLoginSlug($slug), $auth->getLastMessageId()));
         }
 
         return $url;

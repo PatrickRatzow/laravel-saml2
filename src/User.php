@@ -1,11 +1,10 @@
 <?php
 
-namespace Aacotroneo\Saml2\Models;
+namespace Aacotroneo\Saml2;
 
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Jsonable;
 use JsonSerializable;
-
 use OneLogin\Saml2\Auth;
 
 /**
@@ -95,6 +94,16 @@ class User implements Arrayable, Jsonable, JsonSerializable
     public function getAuth(): Auth
     {
         return $this->auth;
+    }
+
+    /**
+     * Get mapped attributes.
+     *
+     * @return array
+     */
+    public function getMappedAttributes(): array
+    {
+        return $this->mapped;
     }
 
     /**

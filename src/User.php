@@ -117,13 +117,27 @@ class User implements Arrayable, Jsonable, JsonSerializable
     {
         foreach ($map as $key => &$value) {
             $value = $this->getAttribute($value);
-            // Collapse arrays to values for single zero-indexed entries.
+        };
+
+        return $this->mapped = $this->collapseValues($map);
+    }
+
+    /**
+     * Collapse array values to single value for zero-indexed entries.
+     *
+     * @param array $array
+     *
+     * @return array
+     */
+    public function collapseValues(array $array): array
+    {
+        foreach ($array as $key => &$value) {
             if (is_array($value) && count($value) === 1 && isset($value[0])) {
                 $value = reset($value);
             }
-        }
+        };
 
-        return $this->mapped = $map;
+        return $array;
     }
 
     /**

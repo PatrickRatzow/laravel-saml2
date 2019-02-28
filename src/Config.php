@@ -101,13 +101,13 @@ class Config
         $idp = $idps[$slug];
 
         if (empty($sp['entityId'])) {
-            $sp['entityId'] = route('saml2.metadata', compact('name'));
+            $sp['entityId'] = route('saml2.metadata', compact('slug'));
         }
         if (empty($sp['assertionConsumerService']['url'])) {
-            $sp['assertionConsumerService']['url'] = route('saml2.acs', compact('name'));
+            $sp['assertionConsumerService']['url'] = route('saml2.acs', compact('slug'));
         }
         if (!empty($sp['singleLogoutService']) && empty($sp['singleLogoutService']['url'])) {
-            $sp['singleLogoutService']['url'] = route('saml2.sls', compact('name'));
+            $sp['singleLogoutService']['url'] = route('saml2.sls', compact('slug'));
         }
         if (is_readable($sp['privateKey'])) {
             $sp['privateKey'] = $this->readPrivateKey($sp['privateKey'], $sp['passphrase'] ?? '');

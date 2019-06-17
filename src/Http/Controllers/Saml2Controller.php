@@ -4,6 +4,7 @@ namespace Aacotroneo\Saml2\Http\Controllers;
 
 use Closure;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -63,9 +64,12 @@ class Saml2Controller extends Controller
      */
     public function login(Request $request, string $slug = null): RedirectResponse
     {
-        return $this->rescue(function () use ($slug) {
+        return $this->rescue(function () use ($request, $slug) {
+            $return_to = $request->input('returnTo') ?: $this->config->route_login;
+            $force_authn = filter_var($request->input('forceAuthn'), FILTER_VALIDATE_BOOLEAN);
+            $is_passive = filter_var($request->input('passive'), FILTER_VALIDATE_BOOLEAN);
             // We want to handle the redirect ourselves.
-            $url = Saml2::login($slug, $this->config->route_login, [], false, false, true, true);
+            $url = Saml2::login($slug, $return_to, [], $force_authn, $is_passive, true, true);
 
             return redirect($url);
         });
@@ -83,7 +87,7 @@ class Saml2Controller extends Controller
     {
         return $this->rescue(function () use ($request, $slug) {
             $name_id = $request->input('nameId');
-            $return_to = $request->input('returnTo');
+            $return_to = $request->input('returnTo') ?: $this->config->route_logout;
             $session_index = $request->input('sessionIndex');
             // We want to handle the redirect ourselves.
             // We should end up in the 'sls' endpoint.
@@ -107,6 +111,30 @@ class Saml2Controller extends Controller
             $metadata = Saml2::metadata($slug);
 
             return response($metadata, 200, ['Content-Type' => 'text/xml']);
+        });
+    }
+
+    /**
+     * List Service Provider routes.
+     *
+     * @param \Illuminate\Http\Request $request Request instance.
+     * @param string|null              $slug    Service Provider slug.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function routes(Request $request, string $slug = null): JsonResponse
+    {
+        return $this->rescue(function () use ($slug) {
+            $slug = Saml2::config()->resolveOneLoginSlugOrFail($slug);
+            $routes = [
+                'acs'      => route('saml2.acs', $slug),
+                'login'    => route('saml2.login', $slug),
+                'logout'   => route('saml2.logout', $slug),
+                'metadata' => route('saml2.metadata', $slug),
+                'sls'      => route('saml2.sls', $slug),
+            ];
+
+            return response()->json($routes);
         });
     }
 

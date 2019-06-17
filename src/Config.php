@@ -82,23 +82,13 @@ class Config
      */
     public function getOneLogin(string $slug = null): array
     {
-        $group = $this->test ? 'test' : 'prod';
-        $sps = $this->config['sps'][$group];
-        $idps = $this->config['idps'][$group];
-        if (empty($slug)) {
-            $slug = $this->config['sps']['default'] ?? key($sps);
-        }
-
-        if (!isset($sps[$slug])) {
-            throw new ServiceProviderNotFoundException($slug);
-        }
-        if (!isset($idps[$slug])) {
-            throw new IdentityProviderNotFoundException($slug);
-        }
+        // Resolve slug.
+        $slug = $this->resolveOneLoginSlugOrFail($slug);
 
         // Grab and process providers.
-        $sp = $sps[$slug];
-        $idp = $idps[$slug];
+        $group = $this->test ? 'test' : 'prod';
+        $sp = $this->config['sps'][$group][$slug];
+        $idp = $this->config['idps'][$group][$slug];
 
         if (empty($sp['entityId'])) {
             $sp['entityId'] = route('saml2.metadata', compact('slug'));
@@ -145,6 +135,37 @@ class Config
         if (empty($slug)) {
             $group = $this->test ? 'test' : 'prod';
             $slug = $this->config['sps']['default'] ?? key($this->config['sps'][$group]);
+        }
+
+        return $slug;
+    }
+
+    /**
+     * Resolve to default Service Provider slug if none is provided or fail.
+     *
+     * @param string|null $slug Service Provider slug.
+     *
+     * @throws \Aacotroneo\Saml2\Exceptions\ServiceProviderNotFoundException
+     *     If no Service Provider was found with the specified slug.
+     * @throws \Aacotroneo\Saml2\Exceptions\IdentityProviderNotFoundException
+     *     If no Identity Provider was found with the specified slug.
+     *
+     * @return string
+     */
+    public function resolveOneLoginSlugOrFail(string $slug = null): ?string
+    {
+        $group = $this->test ? 'test' : 'prod';
+        $sps = $this->config['sps'][$group];
+        $idps = $this->config['idps'][$group];
+        if (empty($slug)) {
+            $slug = $this->config['sps']['default'] ?? key($sps);
+        }
+
+        if (!isset($sps[$slug])) {
+            throw new ServiceProviderNotFoundException($slug);
+        }
+        if (!isset($idps[$slug])) {
+            throw new IdentityProviderNotFoundException($slug);
         }
 
         return $slug;

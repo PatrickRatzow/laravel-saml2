@@ -13,5 +13,6 @@ Route::group([
     Route::get('login/{slug?}', $controller . '@login')->middleware($config->route_login_middleware)->name('login');
     Route::get('logout/{slug?}', $controller . '@logout')->middleware($config->route_logout_middleware)->name('logout');
     Route::get('metadata/{slug?}', $controller . '@metadata')->name('metadata');
+    Route::get('routes/{slug?}', $controller . '@routes')->name('routes');
     Route::get('sls/{slug?}', $controller . '@sls')->name('sls');
 });

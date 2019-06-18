@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Arr;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Aacotroneo\Saml2\Exceptions\ProviderNotFoundException;
 use Aacotroneo\Saml2\Facades\Saml2;
 
@@ -72,7 +73,7 @@ class Saml2Controller extends Controller
             $url = Saml2::login($slug, $return_to, [], $force_authn, $is_passive, true, true);
 
             return redirect($url);
-        });
+        }, $this->config->route_error);
     }
 
     /**
@@ -94,7 +95,7 @@ class Saml2Controller extends Controller
             $url = Saml2::logout($slug, $return_to, [], $name_id, $session_index, true, null, null, null);
 
             return redirect($url);
-        });
+        }, $this->config->route_error);
     }
 
     /**
@@ -103,15 +104,15 @@ class Saml2Controller extends Controller
      * @param \Illuminate\Http\Request $request Request instance.
      * @param string|null              $slug    Service Provider slug.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
      */
-    public function metadata(Request $request, string $slug = null): Response
+    public function metadata(Request $request, string $slug = null): SymfonyResponse
     {
         return $this->rescue(function () use ($slug) {
             $metadata = Saml2::metadata($slug);
 
             return response($metadata, 200, ['Content-Type' => 'text/xml']);
-        });
+        }, $this->config->route_error);
     }
 
     /**
@@ -120,9 +121,9 @@ class Saml2Controller extends Controller
      * @param \Illuminate\Http\Request $request Request instance.
      * @param string|null              $slug    Service Provider slug.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
      */
-    public function routes(Request $request, string $slug = null): JsonResponse
+    public function routes(Request $request, string $slug = null): SymfonyResponse
     {
         return $this->rescue(function () use ($slug) {
             $slug = Saml2::config()->resolveOneLoginSlugOrFail($slug);
@@ -135,7 +136,7 @@ class Saml2Controller extends Controller
             ];
 
             return response()->json($routes);
-        });
+        }, $this->config->route_error);
     }
 
     /**
@@ -154,7 +155,7 @@ class Saml2Controller extends Controller
             $url = Saml2::sls($slug, false, $request_id, $this->config->params_from_server, true);
 
             return redirect($url ?: $this->config->route_logout);
-        });
+        }, $this->config->route_error);
     }
 
     /**
@@ -165,16 +166,16 @@ class Saml2Controller extends Controller
      * @param \Closure    $callback
      * @param string|null $error_path
      *
-     * @return mixed
+     * @return \Illuminate\Http\Response|\Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
      */
-    protected function rescue(Closure $callback, string $error_path = null)
+    protected function rescue(Closure $callback, string $error_path = null): SymfonyResponse
     {
         try {
             return $callback();
         } catch (Exception $e) {
             report($e);
             if (empty($error_path)) {
-                $message = sprintf('[%d] %s', $e->getCode(), $e->getMessage());
+                $message = $e->getCode() ? sprintf('[%d] %s', $e->getCode(), $e->getMessage()) : $e->getMessage();
                 $status = $e instanceof ProviderNotFoundException ? 404 : 422;
                 abort($status, $message);
             }

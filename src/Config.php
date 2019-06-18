@@ -31,9 +31,9 @@ class Config
     /**
      * Get login redirect route.
      *
-     * @return string
+     * @return string|null
      */
-    public function getRouteLogin(): string
+    public function getRouteLogin(): ?string
     {
         return $this->formatUrl(array_get($this->config['settings'], 'route_login'));
     }
@@ -41,9 +41,9 @@ class Config
     /**
      * Get logout redirect route.
      *
-     * @return string
+     * @return string|null
      */
-    public function getRouteLogout(): string
+    public function getRouteLogout(): ?string
     {
         return $this->formatUrl(array_get($this->config['settings'], 'route_logout'));
     }
@@ -51,9 +51,9 @@ class Config
     /**
      * Get error redirect route.
      *
-     * @return string
+     * @return string|null
      */
-    public function getRouteError(): string
+    public function getRouteError(): ?string
     {
         return $this->formatUrl(array_get($this->config['settings'], 'route_error'));
     }
@@ -174,13 +174,17 @@ class Config
     /**
      * Format an URL depending on whether it's a named route or a specific path.
      *
-     * @param string $path
-     * @param array  $params
+     * @param string|null $path
+     * @param array       $params
      *
-     * @return string
+     * @return string|null
      */
-    public function formatUrl(string $path, array $params = []): string
+    public function formatUrl(?string $path, array $params = []): ?string
     {
+        if (empty($path)) {
+            return null;
+        }
+
         return str_contains($path, '/') ? url($path, $params) : route($path, $params);
     }
 

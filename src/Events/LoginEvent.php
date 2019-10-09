@@ -4,22 +4,8 @@ namespace Aacotroneo\Saml2\Events;
 
 use Aacotroneo\Saml2\User;
 
-class LoginEvent
+class LoginEvent extends SamlEvent
 {
-    /**
-     * Service Provider slug.
-     *
-     * @var string|null
-     */
-    protected $slug;
-
-    /**
-     * Last message ID.
-     *
-     * @var string
-     */
-    protected $message_id;
-
     /**
      * Saml2 user instance.
      *
@@ -38,29 +24,9 @@ class LoginEvent
      */
     public function __construct(?string $slug, string $message_id, User $user)
     {
-        $this->slug = $slug;
-        $this->message_id = $message_id;
+        parent::__construct($slug, $message_id);
+
         $this->user = $user;
-    }
-
-    /**
-     * Get Service Provider slug.
-     *
-     * @return string|null
-     */
-    public function getSlug(): ?string
-    {
-        return $this->slug;
-    }
-
-    /**
-     * Get last message ID.
-     *
-     * @return string
-     */
-    public function getMessageId(): string
-    {
-        return $this->message_id;
     }
 
     /**

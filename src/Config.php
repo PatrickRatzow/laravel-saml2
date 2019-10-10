@@ -120,6 +120,23 @@ class Config
             }
         }
 
+        // Metadata signing.
+        if (isset($onelogin['security']['signMetadata']) && is_array($onelogin['security']['signMetadata'])) {
+            $sign_metadata = &$onelogin['security']['signMetadata'];
+            if (isset($sign_metadata['x509cert'], $sign_metadata['privateKey'])) {
+                if (is_readable($sign_metadata['x509cert'])) {
+                    $sign_metadata['x509cert'] = $this->readCertificate($sign_metadata['x509cert']);
+                }
+                if (is_readable($sign_metadata['privateKey'])) {
+                    $sign_metadata['privateKey'] = $this->readPrivateKey(
+                        $sign_metadata['privateKey'],
+                        $sign_metadata['passphrase'] ?? ''
+                    );
+                    unset($sign_metadata['passphrase']);
+                }
+            }
+        }
+
         return $onelogin + compact('sp', 'idp');
     }
 

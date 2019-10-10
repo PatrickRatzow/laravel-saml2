@@ -30,6 +30,9 @@ return [
                 // SAML protocol binding to be used when returning the <Response> message.
                 // Onelogin Toolkit supports for this endpoint the HTTP-Redirect binding only.
                 # 'binding' => Constants::BINDING_HTTP_REDIRECT,
+                // URL location of the IdP where the SP SLO Response will be sent (ResponseLocation)
+                // if not set, url for the SLO Request will be used
+                # 'responseUrl' => '',
             ],
             // Public x509 certificate of the IdP.
             'x509cert' => storage_path('certs/test/idp.crt'),
@@ -81,6 +84,9 @@ return [
                 // SAML protocol binding to be used when returning the <Response> message.
                 // Onelogin Toolkit supports for this endpoint the HTTP-Redirect binding only.
                 # 'binding' => Constants::BINDING_HTTP_REDIRECT,
+                // URL location of the IdP where the SP SLO Response will be sent (ResponseLocation)
+                // if not set, url for the SLO Request will be used
+                # 'responseUrl' => '',
             ],
             // Public x509 certificate of the IdP.
             'x509cert' => storage_path('certs/test/idp.crt'),

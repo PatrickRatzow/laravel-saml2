@@ -80,6 +80,7 @@ class Saml2
      * @param bool        $is_passive         When TRUE the AuthNRequest will set the IsPassive='true'.
      * @param bool        $stay               TRUE to stay (returns the URL string), FALSE to redirect.
      * @param bool        $set_name_id_policy When TRUE the AuthNRequest will set a NameIDPolicy element.
+     * @param string|null $name_id_value_req  Indicates to the IdP the subject that should be authenticated.
      *
      * @return string|null If $stay is TRUE, a string with the SSO URL + LogoutRequest + parameters is returned instead.
      */
@@ -90,7 +91,8 @@ class Saml2
         bool $force_authn = false,
         bool $is_passive = false,
         bool $stay = false,
-        bool $set_name_id_policy = true
+        bool $set_name_id_policy = true,
+        string $name_id_value_req = null
     ): ?string {
         return $this->loadAuth($slug)->login(
             $return_to,
@@ -98,7 +100,8 @@ class Saml2
             $force_authn,
             $is_passive,
             $stay,
-            $set_name_id_policy
+            $set_name_id_policy,
+            $name_id_value_req
         );
     }
 

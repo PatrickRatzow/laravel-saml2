@@ -59,7 +59,10 @@ return [
 
         // Sign the Metadata.
         // Possible values are:
-        // FALSE, TRUE (use sp certs), [keyFileName => 'metadata.key', certFileName => 'metadata.crt']
+        // - FALSE
+        // - TRUE (use sp certs)
+        // - ['keyFileName' => 'metadata.key', 'certFileName' => 'metadata.crt']
+        // - ['x509cert' => '', 'privateKey' => '', 'passphrase' => '']
         'signMetadata' => false,
 
         /** signatures and encryptions required **/

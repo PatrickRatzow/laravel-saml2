@@ -9,7 +9,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Arr;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Aacotroneo\Saml2\Exceptions\ProviderNotFoundException;
 use Aacotroneo\Saml2\Facades\Saml2;

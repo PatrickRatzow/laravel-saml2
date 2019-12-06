@@ -54,12 +54,12 @@ return [
             // In order to handle that the toolkit offers this parameter.
             // (when used, 'x509cert' and 'certFingerprint' values are ignored).
             # 'x509certMulti' => [
-            #      'signing' => [
-            #          0 => '<cert1-string>',
-            #      ],
-            #      'encryption' => [
-            #          0 => '<cert2-string>',
-            #      )
+            #     'signing' => [
+            #         storage_path('certs/test/idp-signing.crt'),
+            #     ],
+            #     'encryption' => [
+            #         storage_path('certs/test/idp-encryption.crt'),
+            #     ],
             # ],
        ],
    ],
@@ -89,7 +89,7 @@ return [
                 # 'responseUrl' => '',
             ],
             // Public x509 certificate of the IdP.
-            'x509cert' => storage_path('certs/test/idp.crt'),
+            'x509cert' => storage_path('certs/prod/idp.crt'),
             //  Instead of use the whole x509cert you can use a fingerprint in
             //  order to validate the SAMLResponse, but we don't recommend to use
             //  that method on production since is exploitable by a collision attack.
@@ -108,12 +108,12 @@ return [
             // In order to handle that the toolkit offers this parameter.
             // (when used, 'x509cert' and 'certFingerprint' values are ignored).
             # 'x509certMulti' => [
-            #      'signing' => [
-            #          0 => '<cert1-string>',
-            #      ],
-            #      'encryption' => [
-            #          0 => '<cert2-string>',
-            #      )
+            #     'signing' => [
+            #         storage_path('certs/prod/idp-signing.crt'),
+            #     ],
+            #     'encryption' => [
+            #         storage_path('certs/prod/idp-encryption.crt'),
+            #     ],
             # ],
        ],
    ],

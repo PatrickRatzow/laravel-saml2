@@ -2,6 +2,7 @@
 
 namespace Aacotroneo\Saml2;
 
+use Illuminate\Support\Arr;
 use Aacotroneo\Saml2\Exceptions\FileNotReadableException;
 use Aacotroneo\Saml2\Exceptions\IdentityProviderNotFoundException;
 use Aacotroneo\Saml2\Exceptions\ServiceProviderNotFoundException;
@@ -105,8 +106,17 @@ class Config
         if (is_readable($sp['x509cert'])) {
             $sp['x509cert'] = $this->readCertificate($sp['x509cert']);
         }
-        if (is_readable($idp['x509cert'])) {
+        if (isset($idp['x509cert']) && is_readable($idp['x509cert'])) {
             $idp['x509cert'] = $this->readCertificate($idp['x509cert']);
+        }
+        if (isset($idp['x509certMulti']['signing'], $idp['x509certMulti']['encryption'])) {
+            $idp['x509certMulti']['signing'] = Arr::wrap($idp['x509certMulti']['signing']);
+            $idp['x509certMulti']['encryption'] = Arr::wrap($idp['x509certMulti']['encryption']);
+            foreach ($idp['x509certMulti'] as &$certificates) {
+                $certificates = array_map(function (string $certificate) {
+                    return is_readable($certificate) ? $this->readCertificate($certificate) : $certificate;
+                }, $certificates);
+            }
         }
 
         // Handle onelogin overrides.

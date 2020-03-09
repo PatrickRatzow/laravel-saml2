@@ -37,7 +37,7 @@ class Config
      */
     public function getRouteLogin(): ?string
     {
-        return $this->formatUrl(array_get($this->config['settings'], 'route_login'));
+        return $this->formatUrl(Arr::get($this->config['settings'], 'route_login'));
     }
 
     /**
@@ -47,7 +47,7 @@ class Config
      */
     public function getRouteLogout(): ?string
     {
-        return $this->formatUrl(array_get($this->config['settings'], 'route_logout'));
+        return $this->formatUrl(Arr::get($this->config['settings'], 'route_logout'));
     }
 
     /**
@@ -57,7 +57,7 @@ class Config
      */
     public function getRouteError(): ?string
     {
-        return $this->formatUrl(array_get($this->config['settings'], 'route_error'));
+        return $this->formatUrl(Arr::get($this->config['settings'], 'route_error'));
     }
 
     /**
@@ -67,7 +67,7 @@ class Config
      */
     public function getRoutesController(): string
     {
-        return array_get($this->config['settings'], 'routes_controller') ?? Saml2Controller::class;
+        return Arr::get($this->config['settings'], 'routes_controller') ?? Saml2Controller::class;
     }
 
     /**
@@ -123,10 +123,10 @@ class Config
         // Handle onelogin overrides.
         $onelogin = $this->config['onelogin'];
         if (isset($sp['onelogin'])) {
-            $overrides = array_pull($sp, 'onelogin');
+            $overrides = Arr::pull($sp, 'onelogin');
             if (!empty($overrides)) {
-                foreach (array_dot($overrides) as $key => $value) {
-                    array_set($onelogin, $key, $value);
+                foreach (Arr::dot($overrides) as $key => $value) {
+                    Arr::set($onelogin, $key, $value);
                 }
             }
         }
@@ -213,7 +213,7 @@ class Config
             return null;
         }
 
-        return str_contains($path, '/') ? url($path, $params) : route($path, $params);
+        return Str::contains($path, '/') ? url($path, $params) : route($path, $params);
     }
 
     /**
@@ -273,7 +273,7 @@ class Config
             return $this->$method();
         }
 
-        return array_get($this->config['settings'], $name);
+        return Arr::get($this->config['settings'], $name);
     }
 
     /**
@@ -285,7 +285,7 @@ class Config
      */
     public function __isset(string $name): bool
     {
-        return array_has($this->config['settings'], $name);
+        return Arr::has($this->config['settings'], $name);
     }
 
     /**
@@ -301,7 +301,7 @@ class Config
         if (starts_with($name, 'get')) {
             $property = snake_case(substr($name, 3));
             if (isset($this->$property)) {
-                return array_get($this->config['settings'], $property);
+                return Arr::get($this->config['settings'], $property);
             }
         }
 

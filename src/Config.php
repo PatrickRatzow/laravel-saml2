@@ -3,6 +3,7 @@
 namespace Aacotroneo\Saml2;
 
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Aacotroneo\Saml2\Exceptions\FileNotReadableException;
 use Aacotroneo\Saml2\Exceptions\IdentityProviderNotFoundException;
 use Aacotroneo\Saml2\Exceptions\ServiceProviderNotFoundException;
@@ -267,7 +268,7 @@ class Config
      */
     public function __get(string $name)
     {
-        $method = 'get' . studly_case($name);
+        $method = 'get' . Str::study($name);
         if (method_exists($this, $method)) {
             return $this->$method();
         }

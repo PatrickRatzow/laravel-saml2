@@ -268,7 +268,7 @@ class Config
      */
     public function __get(string $name)
     {
-        $method = 'get' . Str::study($name);
+        $method = 'get' . Str::studly($name);
         if (method_exists($this, $method)) {
             return $this->$method();
         }

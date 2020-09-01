@@ -4,6 +4,7 @@ namespace Aacotroneo\Saml2;
 
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Jsonable;
+use Illuminate\Support\Arr;
 use JsonSerializable;
 use OneLogin\Saml2\Auth;
 
@@ -149,11 +150,11 @@ class User implements Arrayable, Jsonable, JsonSerializable
      */
     public function __get(string $name)
     {
-        if (array_has($this->proxy, $name)) {
+        if (Arr::has($this->proxy, $name)) {
             return call_user_func([$this->auth, $this->proxy[$name]]);
         }
 
-        return array_get($this->mapped, $name);
+        return Arr::get($this->mapped, $name);
     }
 
     /**
@@ -165,7 +166,7 @@ class User implements Arrayable, Jsonable, JsonSerializable
      */
     public function __isset(string $name): bool
     {
-        return array_has($this->proxy, $name) || array_has($this->mapped, $name);
+        return Arr::has($this->proxy, $name) || Arr::has($this->mapped, $name);
     }
 
     /**
